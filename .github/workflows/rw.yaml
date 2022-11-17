@@ -29,5 +29,8 @@ jobs:
 
     - name: echo gh stuff
       run: |
-        packageVersionSuffix=${GITHUB_RUN_NUMBER}.${GITHUB_SHA::7}
+        # if we have an input sha, use that. Otherwise, use the GH sha.
+        # This accounts for us being called on a branch, from main, or from a comment on a branch
+        sha=${INPUTS_SHA:-GITHUB_SHA}
+        packageVersionSuffix=${GITHUB_RUN_NUMBER}.${INPUTS_SHA::7}
         echo $packageVersionSuffix
