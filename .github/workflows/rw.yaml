@@ -1,0 +1,35 @@
+# This is a Github Reusable Workflow (https://docs.github.com/en/actions/using-workflows/reusing-workflows)
+on:
+  workflow_call:
+    inputs:
+      # should we publish the contracts?
+      publish:
+        required: false
+        default: false
+        type: boolean
+      # if we're being triggered from a comment, we might need to have this specified
+      sha:
+        required: false
+        type: string
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+    - name: echo SHA
+      env: 
+        SHA: ${{ inputs.sha }}
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo ${SHA}
+        echo ${NODE_AUTH_TOKEN}
+          
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.sha || $GITHUB_SHA }}
+
+    - name: Set up node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        registry-url: https://npm.pkg.github.com/
+        scope: '@thing'

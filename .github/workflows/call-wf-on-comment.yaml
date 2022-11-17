@@ -12,11 +12,13 @@ jobs:
   prepare-context:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/publish') }}
+    outputs:
+      sha: ${{ steps.sha.outputs.result }}    
     steps:
       # the issue_comment event doesn't have the SHA available, so we need to get it using the issue context
       - name: Get PR SHA
         id: sha
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           result-encoding: string
           script: |
@@ -27,13 +29,15 @@ jobs:
               pull_number: number,
             });
             return pr.data.head.sha;
-      - name: echo SHA
+      - name: output SHA
         env: 
           SHA: ${{ steps.sha.outputs.result }}
         run: |
-          echo ${SHA}
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
             
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.sha.outputs.result }}
-
+  call-rwf:
+    needs: prepare-context
+    uses: ./.github/workflows/rw.yaml
+    with:
+      publish: true
+      sha: ${{ needs.prepare-context.outputs.sha }}
