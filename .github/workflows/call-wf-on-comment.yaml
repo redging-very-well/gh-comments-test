@@ -35,6 +35,16 @@ jobs:
         run: |
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
             
+  validate-context-output:
+    needs: prepare-context 
+    runs-on: ubuntu-latest
+    steps:
+      - name: output SHA from prepare-context job
+        env: 
+          PREPARE_CONTEXT_SHA: ${{ needs.prepare-context.outputs.sha }}
+        run: |
+          echo "PREPARE_CONTEXT_SHA=${PREPARE_CONTEXT_SHA}"
+
   call-rwf:
     needs: prepare-context
     uses: ./.github/workflows/rw.yaml
